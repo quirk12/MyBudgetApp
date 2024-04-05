@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <dimen name="main_screen_size">52dp</dimen>
+    <dimen name="detail_screen_size">72dp</dimen>
+</resources>

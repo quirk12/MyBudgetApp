@@ -1,0 +1,26 @@
+<resources>
+    <string name="app_name">MyBudgetApp</string>
+    <string name="top_bar">MyBudgetApp</string>
+    <string name="food_spending">Food</string>
+    <string name="transportation_spending">Transportation</string>
+    <string name="other_spending">Others</string>
+    <string name="total_spending_text">Total for %s</string>
+    <string name="total_spending_on_text">Total Spending</string>
+    <string name="total_income_in">Total Income in October</string>
+    <string name="spending">Spending</string>
+    <string name="income">Income</string>
+    <string name="enter_item_name">Name for this Item</string>
+    <string name="enter_category">Category for this Item</string>
+    <string name="enter_cost">Cost for this Item</string>
+    <string name="upload_picture">Upload Picture +</string>
+    <string name="save_button">Save Item</string>
+    <string name="you_cant_add_item_archived">You can\'t add a new item to archived entries</string>
+
+    <string name="this_month_screen">This Month</string>
+    <string name="spending_on_category_screen">%s</string>
+    <string name="total_income_screen">Total Income</string>
+    <string name="adding_item_screen">Add Item</string>
+
+
+
+</resources>
