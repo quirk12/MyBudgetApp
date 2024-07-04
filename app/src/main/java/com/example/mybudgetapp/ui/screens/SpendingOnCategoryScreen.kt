@@ -1,9 +1,6 @@
 package com.example.mybudgetapp.ui.screens
 
 import android.widget.Toast
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -12,7 +9,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -29,20 +25,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.mybudgetapp.R
 import com.example.mybudgetapp.data.SpendingCategoryDisplayObject
 import com.example.mybudgetapp.ui.navigation.NavigationDestination
 import com.example.mybudgetapp.ui.theme.dmSans
 import com.example.mybudgetapp.ui.viewmodels.AppViewModelProvider
-import com.example.mybudgetapp.ui.viewmodels.SpendingOnCategoryItem
 import com.example.mybudgetapp.ui.viewmodels.SpendingOnCategoryScreenViewModel
 import com.example.mybudgetapp.ui.viewmodels.SpendingOnCategoryUiState
 import com.example.mybudgetapp.ui.widgets.BudgetTopAppBar
@@ -61,8 +53,9 @@ object SpendingOnCategoryDestination: NavigationDestination {
 @Composable
 fun SpendingOnCategoryScreen(
     modifier: Modifier = Modifier,
-    navigateToAddItem: () -> Unit,
-    navigateBack: () -> Unit
+    navigateToAddItem: (String) -> Unit,
+    navigateBack: () -> Unit,
+    navigateToItemDates: (Long) -> Unit
 ) {
     val scrollState = rememberLazyListState() // Assuming a LazyColumn
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
@@ -74,7 +67,9 @@ fun SpendingOnCategoryScreen(
         topBar =  {
                 BudgetTopAppBar(
                     canNavigateBack = true,
-                    title = stringResource(id = R.string.spending_on_category_screen, uiState.value.category),
+                    title = stringResource(id = R.string.spending_on_category_screen,
+                        uiState.value.category
+                    ),
                     scrollBehavior = scrollBehavior,
                     navigateBack = navigateBack
                 )
@@ -82,13 +77,16 @@ fun SpendingOnCategoryScreen(
         floatingActionButton = {
             FloatingActionButton(
                 onClick = {
-                    if (uiState.value.isThisMonthCurrent) {navigateToAddItem()}
+                    if (uiState.value.isThisMonthCurrent) {navigateToAddItem(uiState.value.sentCategory)}
                     else {
                         Toast.makeText(context, R.string.you_cant_add_item_archived, Toast.LENGTH_SHORT).show()
                     }
                 },
                 shape = MaterialTheme.shapes.medium,
-                modifier = Modifier.padding(20.dp)
+                modifier = Modifier.padding(20.dp),
+                contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
+                containerColor = MaterialTheme.colorScheme.tertiaryContainer
+
             ) {
                 Icon(
                     imageVector = Icons.Default.Add,
@@ -99,7 +97,9 @@ fun SpendingOnCategoryScreen(
     ) {paddingValues ->
             SpendingOnCategoryBody(
                 Modifier.padding(paddingValues),
-                uiState = uiState.value
+                uiState = uiState.value,
+                deleteItem = {viewModel.deleteItem(it)},
+                navigateToItemDates = {navigateToItemDates(it)},
             )
     }
 }
@@ -108,7 +108,9 @@ fun SpendingOnCategoryScreen(
 @Composable
 fun SpendingOnCategoryBody(
     modifier: Modifier = Modifier,
-    uiState: SpendingOnCategoryUiState
+    uiState: SpendingOnCategoryUiState,
+    deleteItem: (Long) -> Unit,
+    navigateToItemDates: (Long) -> Unit,
 ) {
     Column (
         modifier = Modifier
@@ -152,19 +154,30 @@ fun SpendingOnCategoryBody(
                         title = it.name,
                         totalSpending = it.totalCost,
                         modifier = Modifier.padding(bottom = 12.dp),
-                        item = SpendingCategoryDisplayObject.items[0],
+                        deleteItem = {deleteItem(it.itemId)},
                         date = it.date,
                         imagePath = it.imagePath,
+                        navigateToItemDates = {
+                            navigateToItemDates(it.itemId)
+                        },
                         displayItem =
-                        when (uiState.category) {
+                        when (uiState.sentCategory) {
                             "food" -> SpendingCategoryDisplayObject.items[0]
                             "others" -> SpendingCategoryDisplayObject.items[2]
                             else -> SpendingCategoryDisplayObject.items[1]
-                        }
+                        },
 
                         )
                 }
+
         }
+      /*  if(uiState.isDeleteDialogVisible) {
+            DeleteConfirmationDialog(
+                onDeleteCancel = {onDeleteChange(false)} ,
+                onDeleteConfirm = {},
+            )
+        }*/
+
     }
 }
 

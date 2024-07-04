@@ -2,30 +2,41 @@ package com.example.mybudgetapp.ui.viewmodels
 
 import android.content.Context
 import android.database.sqlite.SQLiteConstraintException
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.net.Uri
-import android.widget.Toast
-import androidx.lifecycle.ViewModel
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.ViewModel
 import com.example.mybudgetapp.database.Item
 import com.example.mybudgetapp.database.ItemRepository
 import com.example.mybudgetapp.database.PurchaseDetails
+import com.example.mybudgetapp.ui.screens.SpendingOnCategoryDestination
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
 import java.text.SimpleDateFormat
 import java.time.LocalDate
-import java.time.Month
 import java.util.Date
 import java.util.Locale
 
 
 class AddingItemScreenViewModel (
-    private val itemRepository: ItemRepository
+    private val itemRepository: ItemRepository,
+    private val savedStateHandle: SavedStateHandle
 ): ViewModel() {
 
-    var uiState by mutableStateOf(SpendingItemDetailsUiState())
+    private val category: String = checkNotNull(savedStateHandle[SpendingOnCategoryDestination.category])
+
+    var uiState by mutableStateOf(
+
+        SpendingItemDetailsUiState(
+            previousCategory = category,
+            itemDetails = if(category != "all") ItemDetails(category = category) else ItemDetails()
+        )
+    )
     private set
     private var date: LocalDate? = null
     private var localIsUploadSuccessful = false
@@ -36,10 +47,16 @@ class AddingItemScreenViewModel (
         date = LocalDate.now()
     }
 
+
     //updating the UiState
     fun updateUiState(itemDetails: ItemDetails) {
         uiState =
-            SpendingItemDetailsUiState(itemDetails = itemDetails, isEntryValid = validateInput(itemDetails), isUploadSuccessful = localIsUploadSuccessful)
+            SpendingItemDetailsUiState(
+                itemDetails = itemDetails,
+                isEntryValid = validateInput(itemDetails),
+                isUploadSuccessful = localIsUploadSuccessful,
+                previousCategory = category
+            )
     }
 
     //when the user selects an image
@@ -49,12 +66,18 @@ class AddingItemScreenViewModel (
         }
 
         updateUiState(uiState.itemDetails.copy(imagePath = imagePath))
-        uiState = uiState.copy(isUploadSuccessful = true)
+        uiState = uiState.copy(isUploadSuccessful = localIsUploadSuccessful)
     }
 
 
     //saving the item to database
    suspend fun onSaveButtonClicked(context: Context) {
+
+            updateUiState(
+                uiState.itemDetails.copy(
+                    name = uiState.itemDetails.name.trim()
+                )
+            )
 
               try {
 
@@ -90,10 +113,14 @@ class AddingItemScreenViewModel (
 
     //extracting the image path
     private fun getImagePath(context: Context, uri: Uri?, callback: (Boolean) -> Unit): String? {
+        if(uri == null) {
+            callback(false)
+            return null
+        }
         try {
             // Step 1: Obtain InputStream from URI
-            val inputStream = uri?.let { context.contentResolver.openInputStream(it) }
-
+            val inputStream = uri.let { context.contentResolver.openInputStream(it) }
+            val bitmap = BitmapFactory.decodeStream(inputStream)
             // Step 2: Create FileOutputStream in External Storage (App-specific directory)
             val externalStorageDirectory = context.getExternalFilesDir(null)
             val appSpecificDirectory = File(externalStorageDirectory, "YourAppImages")
@@ -106,6 +133,8 @@ class AddingItemScreenViewModel (
 
             // Step 4: Create FileOutputStream for the new file
             val fileOutputStream = FileOutputStream(File(externalStorageDirectory, fileName))
+
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 50, fileOutputStream)
 
             // Step 5: Copy Data from InputStream to FileOutputStream
             inputStream?.use { input ->
@@ -146,6 +175,7 @@ class AddingItemScreenViewModel (
 data class SpendingItemDetailsUiState(
     val itemDetails: ItemDetails = ItemDetails(),
     val isEntryValid: Boolean = false,
+    val previousCategory: String = "",
     val isUploadSuccessful: Boolean = false
 )
 

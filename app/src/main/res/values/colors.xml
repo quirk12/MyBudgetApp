@@ -7,7 +7,8 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
-    <color name="pink">#FFfce8f5</color>
-    <color name="pearly">#FFe3fcfb</color>
-    <color name="orange">#FFfcf7e3</color>
+    <color name="pink">#FFfcfafc</color>
+    <color name="pearly">#FFf7fcfc</color>
+    <color name="orange">#FFf7f6f2</color>
+    <color name="income">#FFf7f8fc</color>
 </resources>

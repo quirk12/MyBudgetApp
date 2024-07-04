@@ -1,11 +1,7 @@
 package com.example.mybudgetapp.ui.viewmodels
 
-import android.content.Context
-import android.widget.Toast
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
@@ -20,15 +16,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.Month
-import java.util.Locale
 
 class ThisMonthScreenViewModel( 
     private val itemRepository: ItemRepository
@@ -40,33 +31,40 @@ class ThisMonthScreenViewModel(
     @OptIn(ExperimentalCoroutinesApi::class)
     val uiState: StateFlow<ThisMonthScreenUiState> = selectedMonth.flatMapLatest { month ->
         combine(
-            itemRepository.getTotalSpendingOverall(
-                month = month,
-                year = date.year,
-            ),
-            itemRepository.getTotalSpendingOnCategory(
-                month = month,
-                year = date.year,
-                category = "food"
-            ),
-            itemRepository.getTotalSpendingOnCategory(
-                month = month,
-                year = date.year,
-                category = "transportation"
-            ),
-            itemRepository.getTotalSpendingOnCategory(
-                month = month,
-                year = date.year,
-                category = "others"
-            ),
+            combine(
+                itemRepository.getTotalSpendingOverall(
+                    month = month,
+                    year = date.year,
+                ),
+                itemRepository.getTotalIncomeOverall(
+                    year = date.year, month = month
+                ),
+                itemRepository.getTotalSpendingOnCategory(
+                    month = month,
+                    year = date.year,
+                    category = "food"
+                ),
+                itemRepository.getTotalSpendingOnCategory(
+                    month = month,
+                    year = date.year,
+                    category = "transportation"
+                ),
+                itemRepository.getTotalSpendingOnCategory(
+                    month = month,
+                    year = date.year,
+                    category = "others"
+                )
+            ) { totalSpending, totalIncome, totalFood, totalTrans, totalOther ->
+                listOf(totalSpending, totalIncome, totalFood, totalTrans, totalOther)
+            },
             itemRepository.getAllMonths(date.year)
-        ) { totalSpending, totalFood, totalTransportation, totalOthers, months ->
+        ) { tuple, months ->
             ThisMonthScreenUiState(
-                totalSpending = formatCurrencyIraqiDinar(totalSpending),
-                totalIncome = formatCurrencyIraqiDinar(totalSpending),
-                totalSpendingOnFood = formatCurrencyIraqiDinar(totalFood),
-                totalSpendingOnOthers = formatCurrencyIraqiDinar(totalOthers),
-                totalSpendingOnTransportation = formatCurrencyIraqiDinar(totalTransportation),
+                totalSpending = formatCurrencyIraqiDinar(tuple[0]),
+                totalIncome = formatCurrencyIraqiDinar(tuple[1]),
+                totalSpendingOnFood = formatCurrencyIraqiDinar(tuple[2]),
+                totalSpendingOnOthers = formatCurrencyIraqiDinar(tuple[4]),
+                totalSpendingOnTransportation = formatCurrencyIraqiDinar(tuple[3]),
                 currentMonth = Month.of(month).toString().capitalized(),
                 months = months.map {
                     DropDownItem(

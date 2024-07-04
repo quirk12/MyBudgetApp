@@ -28,5 +28,10 @@ object SpendingCategoryDisplayObject {
             cardColor = R.color.orange,
             spendingIcon = R.drawable.baseline_cookie_24
         ),
+        SpendingCategoryDisplayData (
+            title = R.string.income,
+            cardColor = R.color.income,
+            spendingIcon = R.drawable.baseline_attach_money_25
+        ),
     )
 }

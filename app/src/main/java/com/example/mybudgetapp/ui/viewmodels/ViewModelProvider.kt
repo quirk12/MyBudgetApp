@@ -12,7 +12,8 @@ object AppViewModelProvider {
         // Initializer for ItemEditViewModel
         initializer {
             AddingItemScreenViewModel(
-                budgetApplication().container.itemRepository
+                budgetApplication().container.itemRepository,
+                this.createSavedStateHandle()
             )
         }
 
@@ -26,6 +27,35 @@ object AppViewModelProvider {
         initializer {
             ThisMonthScreenViewModel(
                 budgetApplication().container.itemRepository
+            )
+        }
+        initializer {
+            TotalSpendingScreenViewModel(
+                budgetApplication().container.itemRepository,
+                this.createSavedStateHandle()
+            )
+        }
+        initializer {
+            ItemDatesViewModel(
+                budgetApplication().container.itemRepository,
+                this.createSavedStateHandle()
+            )
+        }
+        initializer {
+            ThisYearScreenViewModel(
+                budgetApplication().container.itemRepository,
+            )
+        }
+        initializer {
+            SpendingOnCategoryForYearScreenViewModel(
+                budgetApplication().container.itemRepository,
+                this.createSavedStateHandle()
+            )
+        }
+        initializer {
+            TotalSpendingScreenForYearViewModel(
+                budgetApplication().container.itemRepository,
+                this.createSavedStateHandle()
             )
         }
 

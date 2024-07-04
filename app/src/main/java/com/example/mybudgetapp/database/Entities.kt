@@ -41,3 +41,5 @@ data class ItemWithPurchaseDetails(
     @Embedded val item: Item,
     val totalCost: Double,
 )
+
+

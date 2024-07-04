@@ -2,11 +2,13 @@
     <string name="app_name">MyBudgetApp</string>
     <string name="top_bar">MyBudgetApp</string>
     <string name="food_spending">Food</string>
-    <string name="transportation_spending">Transportation</string>
+    <string name="transportation_spending">Transit</string>
     <string name="other_spending">Others</string>
+    <string name="test_income">Income</string>
     <string name="total_spending_text">Total for %s</string>
     <string name="total_spending_on_text">Total Spending</string>
-    <string name="total_income_in">Total Income in October</string>
+    <string name="total_income_in">Total Income in %s</string>
+    <string name="total_spending_in">Total Spending in %s</string>
     <string name="spending">Spending</string>
     <string name="income">Income</string>
     <string name="enter_item_name">Name for this Item</string>
@@ -18,8 +20,23 @@
 
     <string name="this_month_screen">This Month</string>
     <string name="spending_on_category_screen">%s</string>
-    <string name="total_income_screen">Total Income</string>
+    <string name="total_income_screen">Total %s</string>
     <string name="adding_item_screen">Add Item</string>
+    <string name="item_added">Your item has been added!</string>
+    <string name="adding_item_screen_title">Add %s Item</string>
+    <string name="delete_item">Delete</string>
+    <string name="edit_item">Edit</string>
+    <string name="item_dates">Item Details</string>
+    <string name="item_dates_body">This item was added on:</string>
+    <string name="total_income_screen_body">Your %s</string>
+    <string name="attention">Attention</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="delete_question">Are you sure you want to delete?</string>
+
+
+
+
 
 
 

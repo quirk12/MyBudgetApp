@@ -12,3 +12,4 @@ fun formatCurrencyIraqiDinar(amount: Double): String {
 fun String.capitalized(): String {
     return this.substring(0, 1).uppercase(Locale.ROOT) + this.substring(1).lowercase(Locale.ROOT)
     }
+

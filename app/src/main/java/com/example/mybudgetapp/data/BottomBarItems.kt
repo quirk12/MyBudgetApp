@@ -1,10 +1,6 @@
 package com.example.mybudgetapp.data
 
 import androidx.annotation.DrawableRes
-import androidx.compose.material.icons.Icons
-import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.res.painterResource
 import com.example.mybudgetapp.R
 
 data class BottomNavigationItem(
@@ -28,11 +24,6 @@ object NavigationItems {
             unSelectedIcon = R.drawable.outline_calendar_month_24,
             hasNews = false
         ),
-        BottomNavigationItem(
-            title = "Settings",
-            selectedIcon = R.drawable.baseline_settings_24,
-            unSelectedIcon = R.drawable.outline_settings_24,
-            hasNews = false
-        ),
+
     )
 }

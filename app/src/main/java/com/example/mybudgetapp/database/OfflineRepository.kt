@@ -15,6 +15,11 @@ class OfflineRepository (
 
     override suspend fun updateItemDateWithId(date: String, id: Long) = itemDao.updateItemDateWithId(date, id)
 
+    override fun getItemFromId(id: Long): Flow<Item>
+    = itemDao.getItemFromId(id)
+    override suspend fun deleteItemWithId(id: Long)  =
+        itemDao.deleteItemWithId(id)
+
     override suspend fun updateItemImagePathWithId(imagePath: String, id: Long) = itemDao.updateItemImagePathWithId(
         imagePath = imagePath, id = id
     )
@@ -33,9 +38,19 @@ class OfflineRepository (
         = purchaseDetailsDao.deleteItem(purchaseDetails)
 
     override fun getAllMonths(year: Int) = purchaseDetailsDao.getAllMonths(year)
+    override fun getAllYears(): Flow<List<Int>> = purchaseDetailsDao.getAllYears()
 
     override fun getItemWithPurchaseDetails(month: Int, year: Int): Flow<List<ItemWithPurchaseDetails>>
      = itemWithPurchaseDetailsDao.getAllItemsWithPurchaseDetails(month = month, year = year)
+
+    override fun getItemWithPurchaseDetailsForYear(year: Int): Flow<List<ItemWithPurchaseDetails>>
+    = itemWithPurchaseDetailsDao.getAllItemsWithPurchaseDetailsForYear(year)
+
+    override fun getItemWithPurchaseDetailsForCategoryForYear(
+        year: Int,
+        category: String
+    ): Flow<List<ItemWithPurchaseDetails>> =
+        itemWithPurchaseDetailsDao.getAllItemsWithPurchaseDetailsForCategoryForYear(year, category)
 
     override fun getItemWithPurchaseDetailsForCategory(month: Int, year: Int, category: String)
     = itemWithPurchaseDetailsDao.getAllItemsWithPurchaseDetailsForCategory(month, year, category)
@@ -45,6 +60,20 @@ class OfflineRepository (
 
     override fun getTotalSpendingOverall(year: Int, month: Int): Flow<Double>
     = itemWithPurchaseDetailsDao.getTotalSpendingOverall(year = year, month = month)
+
+    override fun getTotalIncomeOverall(year: Int, month: Int): Flow<Double> =
+        itemWithPurchaseDetailsDao.getTotalIncomeOverall(year, month = month)
+
+    override fun getTotalIncomeOverallForYear(year: Int): Flow<Double> =
+        itemWithPurchaseDetailsDao.getTotalIncomeOverallForYear(year)
+
+    override fun getTotalSpendingOnCategoryForYear(category: String, year: Int): Flow<Double> =
+        itemWithPurchaseDetailsDao.getTotalSpendingOnCategoryForYear(category, year)
+
+    override fun getTotalSpendingOverallForYear(year: Int): Flow<Double> =
+        itemWithPurchaseDetailsDao.getTotalSpendingOverallForYear(year)
+    override fun getItemDates(id: Long): Flow<List<PurchaseDetails>> =
+        itemWithPurchaseDetailsDao.getALlDatesForAnItem(id)
 
 
 }

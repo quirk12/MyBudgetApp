@@ -2,9 +2,9 @@ package com.example.mybudgetapp.ui.screens
 
 import android.content.Context
 import android.net.Uri
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
-import androidx.activity.result.contract.ActivityResultContract
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
@@ -27,9 +26,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -38,10 +35,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -49,9 +43,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
-import coil.compose.AsyncImage
 import com.example.mybudgetapp.R
 import com.example.mybudgetapp.ui.navigation.NavigationDestination
 import com.example.mybudgetapp.ui.theme.dmSans
@@ -60,13 +52,13 @@ import com.example.mybudgetapp.ui.viewmodels.AppViewModelProvider
 import com.example.mybudgetapp.ui.viewmodels.ItemDetails
 import com.example.mybudgetapp.ui.viewmodels.SpendingItemDetailsUiState
 import com.example.mybudgetapp.ui.widgets.BudgetTopAppBar
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 
 object AddingItemDestination: NavigationDestination {
     override val route = "AddingItem"
     override val titleRes = R.string.adding_item_screen
+    const val category = "category"
+    val routeWithArgs = "${AddingItemDestination.route}/{$category}"
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -83,7 +75,16 @@ fun AddingItem(
         topBar =  {
             BudgetTopAppBar(
                 canNavigateBack = true,
-                title = "",
+                title = stringResource(id = R.string.adding_item_screen_title,
+                    when(uiState.previousCategory){
+                        "food" -> "Food"
+                        "transportation" -> "Transit"
+                        "others" -> "Others"
+                        "income" -> "Income"
+                        "all" -> "Spending"
+                        else -> ""
+                    }
+                    ),
                 navigateBack = navigateBack
             )
         }
@@ -96,10 +97,13 @@ fun AddingItem(
                        coroutineScope.launch {
                            viewModel.onSaveButtonClicked(context = context)
                        }
+                Toast.makeText(context, R.string.item_added, Toast.LENGTH_SHORT).show()
+                navigateBack()
             },
             onItemValueChange = viewModel::updateUiState,
             isUploadSuccessful = uiState.isUploadSuccessful,
-            isEntryValid = uiState.isEntryValid
+            isEntryValid = uiState.isEntryValid,
+            previousCategory = uiState.previousCategory
         )
     }
 }
@@ -114,7 +118,8 @@ fun AddingItemBody(
     itemDetails: ItemDetails,
     isUploadSuccessful: Boolean,
     isEntryValid: Boolean,
-    saveItem: () -> Unit
+    saveItem: () -> Unit,
+    previousCategory: String,
 ) {
     var isExpanded by remember {
         mutableStateOf(false)
@@ -143,7 +148,9 @@ fun AddingItemBody(
     ) {
         OutlinedTextField(
             value = itemDetails.name,
-            onValueChange = { onItemValueChange(itemDetails.copy(name = it)) },
+            onValueChange = {
+                onItemValueChange(itemDetails.copy(name = it))
+                            },
             label = { Text(text = stringResource(id = R.string.enter_item_name))},
             modifier = Modifier.fillMaxWidth(),
             singleLine = true,
@@ -153,7 +160,7 @@ fun AddingItemBody(
         )
         OutlinedTextField(
             value = itemDetails.cost,
-            onValueChange = { onItemValueChange(itemDetails.copy(cost = it)) },
+            onValueChange = { onItemValueChange(itemDetails.copy(cost = it.replace(regex = Regex("[ ,-]"), ""))) },
             label = { Text(text = stringResource(id = R.string.enter_cost))},
             modifier = Modifier.fillMaxWidth(),
             singleLine = true,
@@ -168,86 +175,91 @@ fun AddingItemBody(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Start
         ) {
-            ExposedDropdownMenuBox(
-                expanded = isExpanded,
-                onExpandedChange = {newValue ->
-                    isExpanded = newValue
-                },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                OutlinedTextField(
-                    value = stringResource(id = category) ,
-                    onValueChange = {/* TODO */  },
-                    readOnly = true,
-                    trailingIcon = {ExposedDropdownMenuDefaults.TrailingIcon(expanded = isExpanded)},
-                    colors = ExposedDropdownMenuDefaults.textFieldColors(),
-                    modifier = Modifier
-                        .menuAnchor()
-                        .fillMaxWidth()
-                )
 
-                ExposedDropdownMenu(
-                    expanded = isExpanded ,
-                    onDismissRequest = { isExpanded = false },
+            if(previousCategory == "all") {
+                ExposedDropdownMenuBox(
+                    expanded = isExpanded,
+                    onExpandedChange = {newValue ->
+                        isExpanded = newValue
+                    },
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    DropdownMenuItem(
-                        text = { Text(text = stringResource(id = R.string.food_spending)) },
-                        onClick = {
-                            onItemValueChange(itemDetails.copy(category = "food"))
-                            isExpanded = false
-                            category = R.string.food_spending
-                        },
-                        modifier = Modifier.fillMaxWidth()
+                    OutlinedTextField(
+                        value = stringResource(id = category) ,
+                        onValueChange = {/* TODO */  },
+                        readOnly = true,
+                        trailingIcon = {ExposedDropdownMenuDefaults.TrailingIcon(expanded = isExpanded)},
+                        colors = ExposedDropdownMenuDefaults.textFieldColors(),
+                        modifier = Modifier
+                            .menuAnchor()
+                            .fillMaxWidth()
                     )
-                    DropdownMenuItem(
-                        text = { Text(text = stringResource(id = R.string.transportation_spending)) },
-                        onClick = {
-                            onItemValueChange(itemDetails.copy(category = "transportation"))
-                            isExpanded = false
-                            category = R.string.transportation_spending
-                        },
+
+                    ExposedDropdownMenu(
+                        expanded = isExpanded ,
+                        onDismissRequest = { isExpanded = false },
                         modifier = Modifier.fillMaxWidth()
-                    )
-                    DropdownMenuItem(
-                        text = { Text(text = stringResource(id = R.string.other_spending)) },
-                        onClick = {
-                            onItemValueChange(itemDetails.copy(category = "others"))
-                            isExpanded = false
-                            category = R.string.other_spending
-                        },
-                        modifier = Modifier.fillMaxWidth()
-                    )
+                    ) {
+                        DropdownMenuItem(
+                            text = { Text(text = stringResource(id = R.string.food_spending)) },
+                            onClick = {
+                                onItemValueChange(itemDetails.copy(category = "food"))
+                                isExpanded = false
+                                category = R.string.food_spending
+                            },
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                        DropdownMenuItem(
+                            text = { Text(text = stringResource(id = R.string.transportation_spending)) },
+                            onClick = {
+                                onItemValueChange(itemDetails.copy(category = "transportation"))
+                                isExpanded = false
+                                category = R.string.transportation_spending
+                            },
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                        DropdownMenuItem(
+                            text = { Text(text = stringResource(id = R.string.other_spending)) },
+                            onClick = {
+                                onItemValueChange(itemDetails.copy(category = "others"))
+                                isExpanded = false
+                                category = R.string.other_spending
+                            },
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
                 }
             }
+
         }
 
-
-        
-        Row (
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Start
-        ) {
-            Icon(
-                imageVector = if(isUploadSuccessful) Icons.Filled.Check else Icons.Filled.Close,
-                contentDescription = null,
-                tint = if(isUploadSuccessful) Color.Green else Color.Red,
-            )
-            TextButton(onClick = {
-                photoPickerLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
-            }) {
-
-                Text(
-                    text = stringResource(id = R.string.upload_picture),
-                    fontSize = 26.sp,
-                    fontFamily = dmSans,
-                    fontWeight = FontWeight.Bold
+        if(previousCategory != "income") {
+            Row (
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Start
+            ) {
+                Icon(
+                    imageVector = if(isUploadSuccessful) Icons.Filled.Check else Icons.Filled.Close,
+                    contentDescription = null,
+                    tint = if(isUploadSuccessful) Color.Green else Color.Red,
                 )
+                TextButton(onClick = {
+                    photoPickerLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+                }) {
+
+                    Text(
+                        text = stringResource(id = R.string.upload_picture),
+                        fontSize = 26.sp,
+                        fontFamily = dmSans,
+                        fontWeight = FontWeight.Bold
+                    )
+
+                }
 
             }
-
         }
+
 
         Button(
             onClick = saveItem,
