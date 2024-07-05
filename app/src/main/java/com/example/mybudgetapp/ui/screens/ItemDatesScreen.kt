@@ -68,8 +68,8 @@ fun ItemDatesScreen(
     ) { paddingValues ->
 
         ItemDatesBody(
-            uiState = uiState.value,
-            modifier = Modifier.padding(paddingValues)
+            modifier = Modifier.padding(paddingValues),
+            uiState = uiState.value
         )
 
     }
@@ -93,17 +93,19 @@ fun ItemDatesBody(
 
             item {
                 ItemCardForDates(
-                    title = uiState.item.name ,
-                    displayItem =  when (uiState.item.category) {
+                    title = uiState.name,
+                    displayItem =
+                    when (uiState.category) {
                         "food" -> SpendingCategoryDisplayObject.items[0]
                         "others" -> SpendingCategoryDisplayObject.items[2]
                         "transportation" -> SpendingCategoryDisplayObject.items[1]
                         else -> SpendingCategoryDisplayObject.items[3]
-                    } ,
-                    imagePath = uiState.item.picturePath,
+                    },
+                    imagePath = uiState.picturePath,
                     modifier = Modifier.padding(bottom = 32.dp)
                 )
-
+            }
+            item {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.Start,
@@ -120,6 +122,9 @@ fun ItemDatesBody(
                     )
                 }
             }
+
+
+
 
 
             items(uiState.itemDatesList) {

@@ -1,9 +1,13 @@
 package com.example.mybudgetapp.ui.widgets
 
+import android.util.Log
+import android.widget.Toast
 import androidx.annotation.StringRes
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.indication
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -38,6 +42,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
@@ -148,6 +153,7 @@ fun ItemCard(
     deleteItem: () -> Unit,
     navigateToItemDates: () -> Unit,
 ){
+
     var isContextMenuVisible by rememberSaveable {
         mutableStateOf(false)
     }
@@ -176,6 +182,7 @@ fun ItemCard(
             .onSizeChanged {
                 itemHeight = with(density) { it.height.toDp() }
             }
+            .clickable { navigateToItemDates() }
             .then(modifier),
     ) {
         Row(
@@ -185,23 +192,23 @@ fun ItemCard(
                 .padding(8.dp)
                 .fillMaxWidth()
                 .indication(interactionSource, LocalIndication.current)
-             .pointerInput(true) {
-                 detectTapGestures(
-                     onLongPress = {
-                         isContextMenuVisible = true
-                         pressOffset = DpOffset(it.x.toDp(), it.y.toDp())
-                     },
-                     onPress = {
-                         val press = PressInteraction.Press(it)
-                         interactionSource.emit(press)
-                         tryAwaitRelease()
-                         interactionSource.emit(PressInteraction.Release(press))
-                     },
-                     onTap = {
-                         navigateToItemDates()
-                     }
-                 )
-             }
+                .pointerInput(true) {
+                    detectTapGestures(
+                        onLongPress = {
+                            isContextMenuVisible = true
+                            pressOffset = DpOffset(it.x.toDp(), it.y.toDp())
+                        },
+                        onPress = {
+                            val press = PressInteraction.Press(it)
+                            interactionSource.emit(press)
+                            tryAwaitRelease()
+                            interactionSource.emit(PressInteraction.Release(press))
+                        },
+                        onTap = {
+                            navigateToItemDates()
+                        }
+                    )
+                }
         ) {
             Row (
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -313,6 +320,7 @@ fun TotalIncomeCard(
     totalSpending: String,
     month: String,
 ) {
+
     Card(
         elevation = CardDefaults.cardElevation(8.dp),
         shape = RoundedCornerShape(24.dp),
@@ -406,6 +414,15 @@ fun ItemCardForDates(
     displayItem: SpendingCategoryDisplayData,
     imagePath: String?,
     ){
+    val context = LocalContext.current
+
+    // Debug print statements
+    Log.d("ItemCardForDates", "Title: ${context.getString(displayItem.title)}")
+    Log.d("ItemCardForDates", "CardColor: ${context.resources.getResourceName(displayItem.cardColor)}")
+    Log.d("ItemCardForDates", "SpendingIcon: ${context.resources.getResourceName(displayItem.spendingIcon)}")
+    Log.d("ItemCardForDates", "Test: ${displayItem.test}")
+
+
 
     Card (
         elevation = CardDefaults.cardElevation(8.dp),
@@ -415,6 +432,11 @@ fun ItemCardForDates(
         modifier = Modifier
             .fillMaxWidth()
             .wrapContentHeight()
+            .clickable {
+                Toast
+                    .makeText(context, "this is ${displayItem.test}", Toast.LENGTH_SHORT)
+                    .show()
+            }
             .then(modifier),
     ) {
         Row(
@@ -440,13 +462,18 @@ fun ItemCardForDates(
                         verticalArrangement = Arrangement.Center,
                         modifier = Modifier.fillMaxSize()
                     ) {
-                        AsyncImage(
-                            model = imagePath,
-                            contentDescription = null,
-                            placeholder = painterResource(id = displayItem.spendingIcon),
-                            error = painterResource(id = displayItem.spendingIcon),
-                            contentScale = ContentScale.FillBounds
-                        )
+                        if(imagePath != null){
+                            AsyncImage(
+                                model = imagePath,
+                                contentDescription = null,
+                                placeholder = painterResource(id = displayItem.spendingIcon) ,
+                                error = painterResource(id = displayItem.spendingIcon),
+                                contentScale = ContentScale.FillBounds
+                            )
+                        } else {
+                           Image(painter = painterResource(id = displayItem.spendingIcon), contentDescription = null)
+                    }
+
                     }
 
                 }

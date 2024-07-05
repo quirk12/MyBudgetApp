@@ -49,7 +49,6 @@ fun AppNavHost (
                 },
                 navigateToThisYearScreen = {
                     navController.navigate(ThisYearDestination.route)
-                    navController.popBackStack(ThisYearDestination.route, false)
                                            }  ,
                 navigateToThisMonthScreen = {}
             )
@@ -59,8 +58,7 @@ fun AppNavHost (
             ThisYearScreen(
                 navigateToThisYearScreen = {},
                 navigateToThisMonthScreen = {
-                    navController.navigate(ThisMonthDestination.route)
-                    navController.popBackStack(ThisMonthDestination.route, false)
+                    navController.navigateUp()
                 },
                 navigateToSpendingOnCategoryForYear = { category, year ->
                     navController.navigate(

@@ -4,7 +4,6 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.mybudgetapp.data.formatCurrencyIraqiDinar
-import com.example.mybudgetapp.database.Item
 import com.example.mybudgetapp.database.ItemRepository
 import com.example.mybudgetapp.database.PurchaseDetails
 import com.example.mybudgetapp.ui.screens.ItemDatesScreenNavigationDestination
@@ -28,7 +27,10 @@ class ItemDatesViewModel(
     ) { dates, item ->
         ItemDatesUiState (
             itemDatesList = dates.map { it.toItemWithDates() },
-            item = item
+            category = item.category,
+            name = item.name,
+            date = item.date,
+            picturePath = item.picturePath
         )
 
     }.stateIn(
@@ -36,6 +38,7 @@ class ItemDatesViewModel(
         started = SharingStarted.WhileSubscribed(TIMEOUT_MILLIS),
         initialValue = ItemDatesUiState()
     )
+
 
 
 
@@ -48,12 +51,10 @@ class ItemDatesViewModel(
 
 data class ItemDatesUiState(
     val itemDatesList: List<ItemWIthDates> = listOf(),
-    val item: Item = Item(
-        category = "",
-        picturePath = null,
-        date = "",
-        name = ""
-    )
+    val category: String = "",
+    val picturePath: String? = null,
+    val date: String = "",
+    val name: String = "",
 )
 
 data class ItemWIthDates (
