@@ -1,7 +1,5 @@
 package com.example.mybudgetapp.ui.widgets
 
-import android.util.Log
-import android.widget.Toast
 import androidx.annotation.StringRes
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
@@ -42,7 +40,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onSizeChanged
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
@@ -414,13 +411,7 @@ fun ItemCardForDates(
     displayItem: SpendingCategoryDisplayData,
     imagePath: String?,
     ){
-    val context = LocalContext.current
 
-    // Debug print statements
-    Log.d("ItemCardForDates", "Title: ${context.getString(displayItem.title)}")
-    Log.d("ItemCardForDates", "CardColor: ${context.resources.getResourceName(displayItem.cardColor)}")
-    Log.d("ItemCardForDates", "SpendingIcon: ${context.resources.getResourceName(displayItem.spendingIcon)}")
-    Log.d("ItemCardForDates", "Test: ${displayItem.test}")
 
 
 
@@ -432,11 +423,6 @@ fun ItemCardForDates(
         modifier = Modifier
             .fillMaxWidth()
             .wrapContentHeight()
-            .clickable {
-                Toast
-                    .makeText(context, "this is ${displayItem.test}", Toast.LENGTH_SHORT)
-                    .show()
-            }
             .then(modifier),
     ) {
         Row(
